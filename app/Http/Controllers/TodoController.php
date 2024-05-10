@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\TodoResource;
 use App\Models\Todo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TodoController extends Controller
 {
@@ -12,9 +14,7 @@ class TodoController extends Controller
      */
     public function index()
     {
-        $todos = Todo::get();
-
-        return response()->json($todos);
+        return TodoResource::collection(Auth::user()->todos()->latest("id")->get());
     }
 
     /**
@@ -30,15 +30,17 @@ class TodoController extends Controller
      */
     public function store(Request $request)
     {
+        $this->validate($request, [
+            'title' => ['required'],
+        ]);
+
         $todo = Todo::create([
+            'user_id' => Auth::id(),
             'title' => request('title'),
             'status' => 0,
         ]);
 
-        return response()->json([
-            'message' => 'Todo created successfully',
-            'todo' => $todo
-        ]);
+        return TodoResource::make($todo);
     }
 
     /**
@@ -62,27 +64,27 @@ class TodoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Todo $todo)
     {
-        $todo = Todo::find($id);
+        $this->authorize('update', $todo);
+        $this->validate($request, [
+            'title' => ['required'],
+        ]);
 
         $todo->update([
             'title' => request('title', $todo->title),
             'status' => request('status', $todo->status),
         ]);
 
-        return response()->json([
-            'message' => 'Todo updated successfully',
-            'todo' => $todo
-        ]);
+        return TodoResource::make($todo);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Todo $todo)
     {
-        $todo = Todo::find($id);
+        $this->authorize('delete', $todo);
 
         $todo->delete();
 

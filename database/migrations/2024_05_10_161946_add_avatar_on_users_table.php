@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('todos', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId("user_id")->constrained("users");
-            $table->string("title");
-            $table->boolean("status");
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('avatar')->after('email')->nullable()->default(null);
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('todos');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('avatar');
+        });
     }
 };
