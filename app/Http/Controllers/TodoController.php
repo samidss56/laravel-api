@@ -35,7 +35,10 @@ class TodoController extends Controller
             'status' => 0,
         ]);
 
-        return response()->json($todo);
+        return response()->json([
+            'message' => 'Todo created successfully',
+            'todo' => $todo
+        ]);
     }
 
     /**
@@ -68,7 +71,10 @@ class TodoController extends Controller
             'status' => request('status', $todo->status),
         ]);
 
-        return response()->json($todo);
+        return response()->json([
+            'message' => 'Todo updated successfully',
+            'todo' => $todo
+        ]);
     }
 
     /**
